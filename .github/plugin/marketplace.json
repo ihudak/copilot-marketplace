@@ -1,0 +1,20 @@
+{
+  "name": "copilot-marketplace",
+  "metadata": {
+    "description": "Private GitHub Copilot plugin marketplace for development workflow skills",
+    "version": "1.0.0",
+    "pluginRoot": "."
+  },
+  "owner": {
+    "name": "Ivan Hudak",
+    "email": "ihudak@github.com"
+  },
+  "plugins": [
+    {
+      "name": "dev-workflows",
+      "source": "dev-workflows",
+      "description": "Structured development workflow skills for implementing features, fixing vulnerabilities, and upgrading dependencies — with branch management, Opus review, and automated maintenance.",
+      "version": "1.0.0"
+    }
+  ]
+}
