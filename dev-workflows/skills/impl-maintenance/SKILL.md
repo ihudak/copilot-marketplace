@@ -50,8 +50,10 @@ Evaluate whether the implementation reveals missing rules, outdated instructions
 
 ### Task C — Documentation
 
-1. **Assess necessity** — Skip if `change_type` is `bugfix`, `security`, `refactor`, or `test-only`
-   with no user-visible behaviour change. Record `docs: no update required (non-visible change)`.
+1. **Assess necessity** — Skip if `change_type` is `bugfix`, `security`, `refactor`, `test-only`,
+   or `docs` (for `docs`: the work itself is the documentation update — no secondary doc change
+   needed). Record `docs: no update required (non-visible change)` or
+   `docs: no update required (change_type: docs — work is the docs)` as appropriate.
 
 2. **Locate docs** — Use `glob` to find: `README.md`, `README.rst`, `docs/**/*.md`,
    `USAGE.md`, `CONTRIBUTING.md`, or any top-level user-facing doc files.

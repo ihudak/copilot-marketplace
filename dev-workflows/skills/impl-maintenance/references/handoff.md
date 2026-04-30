@@ -5,7 +5,7 @@
 ```markdown
 ## Implementation Summary
 repo: /absolute/path/to/repo
-change_type: feature       # feature | bugfix | security | refactor | test-only
+change_type: feature       # feature | bugfix | security | refactor | test-only | docs
 description: >
   Added OAuth2 login support with Google and GitHub providers.
   Users can now log in via /auth/oauth/google and /auth/oauth/github.
@@ -32,6 +32,7 @@ model_routing:             # optional; echo in output if present.
 - `security` / `vulnerability` — CVE or security patch → skip docs
 - `refactor` — internal restructuring, same external behaviour → skip docs
 - `test-only` — tests added/changed, no prod code change → skip docs
+- `docs` — documentation-only change → skip docs (work IS the docs)
 
 ## Output (impl-maintenance → impl orchestrator)
 

@@ -100,17 +100,40 @@ All orchestrators must load and follow `model-routing.md` at the start of every 
 ## `dev-workflows` plugin — skill relationships
 
 ```
-impl:        → [rubber-duck@Opus plan critique] → impl → [code-review@Opus] → review-fixer → tests → impl-maintenance
-fix-vuln:    → vuln-research → vuln-fixer → [code-review@Opus] → review-fixer → tests → impl-maintenance
-upgrade:     → upgrade-planner → upgrade-executor → [code-review@Opus] → review-fixer → tests → impl-maintenance
-             └── test-baseliner (used by upgrade-executor and vuln-fixer for baseline capture)
+impl:code: / impl:  → [rubber-duck@Opus plan critique] → impl → [code-review@Opus] → review-fixer → test-writer → tests → impl-maintenance
+impl:docs:          → impl-docs → impl-maintenance
+fix-vuln:           → vuln-research → vuln-fixer → [code-review@Opus] → review-fixer → tests → impl-maintenance
+upgrade:            → upgrade-planner → upgrade-executor → [code-review@Opus] → review-fixer → tests → impl-maintenance
+                    └── test-baseliner (used by upgrade-executor, vuln-fixer, and impl:code:)
+                    └── test-writer    (used by impl:code: only — Phase 3.7)
 ```
 
-Key invariants enforced by all three orchestrators:
+Key invariants enforced by all three code orchestrators:
 - Branch created before any file is touched (`feat/<slug>` or equivalent)
 - Opus review gate runs **before** tests for `SIGNIFICANT`/`HIGH-RISK` tasks
 - `review-fixer` handles BLOCKER findings; only one review-fixer cycle per review
 - `impl-maintenance` runs post-batch to update KB, `copilot-instructions.md`, and project docs
+
+Key invariants for `impl:code:` specifically:
+- Test baseline captured (Phase 2.6) **before** any source edits, using `test-baseliner`
+- `test-writer` sub-agent (Phase 3.7) writes tests for **new/changed behaviour** — mandatory for code changes
+- If no test framework is detected, user is asked explicitly — test-writing is never silently skipped
+- Full test suite verified against baseline (Phase 3.8) before Phase 4
+
+Key invariants for `impl:docs:`:
+- **No branch creation by default** — works on current branch unless user requests one
+- **No test-baseliner, no test-writer, no code-review** — docs-only phases only
+- Mixed code + docs changes must use `impl:code:` instead
+
+## Test-writing requirement for code changes
+
+Any `impl:code:` (or `impl:`) invocation that touches source code **must** produce at least
+one passing test for each new or changed behaviour before the workflow is considered complete.
+
+- Prefer unit tests; use integration/e2e only if that is the project's established pattern.
+- Tests must be meaningful (assert specific behaviour), deterministic, and follow existing project conventions.
+- If no test framework is detected, the workflow surfaces this explicitly and asks the user how to proceed — it never silently skips test-writing.
+- Docs-only changes (`impl:docs:`) are exempt from this requirement.
 
 ## Updating the installed plugin after editing
 

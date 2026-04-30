@@ -1,15 +1,21 @@
 ---
 name: impl
 description: >
-  Structured implementation workflow. Use this skill whenever the user's prompt starts with "impl:" or "implement:" or "impl: @<file>".
-  Enforces ask-don't-guess discipline: clarify all ambiguities first, produce an approved plan, then implement immediately.
+  Structured code-implementation workflow. Activated when the user's prompt starts with
+  "impl:", "impl:code:", "implement:", or "impl: @<file>". Does NOT activate for
+  "impl:docs:" prompts — those are handled by the impl-docs skill.
+  Enforces ask-don't-guess discipline: clarify all ambiguities first, produce an approved plan,
+  then implement immediately. Captures a test baseline before changes, writes tests for all
+  new/changed behaviour, and verifies no regressions after.
   After completion, persists learned knowledge and updates instructions.
 allowed-tools: view, edit, create, bash, glob, grep, ask_user, sql
 ---
 
-# `impl:` — Structured Implementation Skill
+# `impl:` / `impl:code:` — Structured Code-Implementation Skill
 
-Activated when the user prompt starts with `impl:` or `implement:` (optionally followed by `@<file.md>` to load description from a file).
+Activated when the user prompt starts with `impl:`, `impl:code:`, or `implement:`
+(optionally followed by `@<file.md>` to load description from a file).
+`impl:` is a silent alias for `impl:code:` — behaviour is identical.
 
 > **Model routing is mandatory.** Before any planning happens, this skill MUST
 > classify the task per `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/_shared/model-routing.md` and follow
@@ -19,13 +25,16 @@ Activated when the user prompt starts with `impl:` or `implement:` (optionally f
 
 ## Phase 0 — Load the description
 
-1. If the prompt is `impl: @<file.md>` (with an `@` prefix pointing to a markdown file):
+1. If the prompt is `impl: @<file.md>` or `impl:code: @<file.md>` (with an `@` prefix pointing to a markdown file):
    - Read the referenced file's full content using the `view` tool. Resolve the path relative to the current working directory.
    - Confirm the file was loaded: `"Loaded prompt from <filename.md> (N lines)."`
    - If the file cannot be read, stop and report the error to the user immediately.
    - If the file embeds images (e.g. `![…](path)`), note them as "referenced image: <path>" in context.
    - Treat the file's content as the implementation description going forward.
-2. Otherwise, treat the text after `impl:` (or `implement:`) as the description verbatim.
+2. Otherwise, treat the text after `impl:` (or `impl:code:` / `implement:`) as the description verbatim.
+3. **Docs-only guard**: if the prompt starts with `impl:docs:`, stop immediately and tell the user:
+   > This prompt looks like a docs-only change. Use `impl:docs:` instead — it skips branching,
+   > code review, and test phases, keeping documentation work lightweight.
 
 ---
 
@@ -172,7 +181,39 @@ Before writing any file, ensure all work is isolated on a dedicated branch.
 
 ---
 
-## Phase 3 — Implementation
+## Phase 2.6 — Test Baseline Capture
+
+Before touching any source files, record the current test suite state. This baseline is
+used in Phase 3.8 to detect regressions introduced during implementation.
+
+1. Invoke the `test-baseliner` sub-agent in `capture` mode:
+   ```
+   task(
+     agent_type: "test-baseliner",
+     mode:       "sync",
+     description:"Test baseline capture (pre-impl)",
+     prompt:     "## Test Baseline Request\nrepo: <absolute-repo-root>\nmode: capture\n<model_routing block>"
+   )
+   ```
+2. Record the result:
+   - `status: OK` — baseline captured. Record `passing_count` and `passing_tests` list for Phase 3.8.
+   - `status: NO_TESTS` or `COMMAND_NOT_FOUND` — note this. Do **not** block implementation.
+     Record `baseline_status: NO_TESTS` (or `COMMAND_NOT_FOUND`) for use in Phase 3.7
+     (the test-writer will surface the no-framework situation to the user).
+   - `status: RUN_FAILED` — ask the user:
+     ```
+     ask_user(
+       question: "The test suite failed before any changes were made. How would you like to proceed?",
+       choices: [
+         "Investigate and fix the failing tests first (Recommended)",
+         "Proceed — treat the test suite as unavailable for this impl",
+         "Cancel"
+       ]
+     )
+     ```
+
+> Do not run any other commands between Phase 2.6 and Phase 3.
+> The baseline must reflect the exact state of the newly-created branch before any edits.
 
 **Implement immediately. Do NOT ask "Should I implement?" or any variation.**
 
@@ -189,9 +230,8 @@ Follow the approved plan step-by-step:
 6. After all code changes:
    - **If classification is SIGNIFICANT or HIGH-RISK**, do NOT run tests yet —
      proceed to Phase 3.5 (Opus code review) first.
-   - Otherwise (SIMPLE/MODERATE): run any existing linters, builds, and tests
-     that are relevant. Fix any failures caused by your changes before
-     proceeding.
+   - Otherwise (SIMPLE/MODERATE): run any existing linters and builds (not the full test suite).
+     Fix any build/lint failures before proceeding to Phase 3.7.
 7. Verify the outcome matches the approved plan.
 
 ---
@@ -223,20 +263,99 @@ Mandatory gate **before** tests are run for SIGNIFICANT / HIGH-RISK tasks.
    )
    ```
    Inspect the Fix Report's `Stop condition flag`:
-   - `CLEAR` → all BLOCKER findings were applied; proceed to Phase 3.6.
+   - `CLEAR` → all BLOCKER findings were applied; proceed to Phase 3.7.
    - `NEEDS HUMAN` → surface the deferred BLOCKERs to the user via `ask_user`
      (one question per unresolved BLOCKER). Do not proceed to tests until the
      user resolves each one. After resolution, run a single re-review cycle
      (re-invoke `code-review`, then `review-fixer` once more). If the re-review
      still BLOCKs, stop and surface to user — do not loop further.
-   Document the disposition of every CONCERN from the review output.
-4. Only after every BLOCKER is resolved, proceed to:
+    Document the disposition of every CONCERN from the review output.
+4. Only after every BLOCKER is resolved, proceed to Phase 3.7.
 
-## Phase 3.6 — Tests (after Opus review for SIGNIFICANT/HIGH-RISK)
+---
 
-1. Run existing linters, builds, and tests.
-2. Fix any failures caused by your changes (current model or Sonnet).
-3. Re-run tests if any review fixes or test fixes were applied.
+## Phase 3.7 — Write / Update Tests
+
+Mandatory for all code changes. Skip **only** if the user explicitly chose
+"Proceed without tests" after a `NO_TESTS` / `COMMAND_NOT_FOUND` baseline in Phase 2.6.
+
+1. Collect the list of changed source files and their one-line change summaries from Phase 3.
+2. Invoke the `test-writer` sub-agent:
+   ```
+   task(
+     agent_type: "test-writer",
+     mode:       "sync",
+     description:"Write tests for changed behaviour",
+     prompt:     "<task description>
+                  changed_files: [<relative path> — <one-line summary>, ...]
+                  repo: <absolute-repo-root>
+                  baseline_status: <OK | NO_TESTS | COMMAND_NOT_FOUND — from Phase 2.6>
+                  command_hint: <test command from Phase 2.6 result, if status was OK>
+                  <model_routing block>"
+   )
+   ```
+3. Inspect the Test Report:
+   - `status: OK` — tests written; proceed to Phase 3.8.
+   - `status: NO_TESTS` or `COMMAND_NOT_FOUND` — surface to user (do NOT silently skip):
+     ```
+     ask_user(
+       question: "No test framework was detected in this project. Writing tests is required for code changes. How would you like to proceed?",
+       choices: [
+         "Set up a test framework first — I will handle it, then re-invoke impl:code: (Recommended)",
+         "Proceed without tests for this change — document the reason in the report",
+         "Cancel"
+       ]
+     )
+     ```
+     - **Set up first** → stop; summarise what was implemented so far so the user can resume.
+     - **Proceed without tests** → record the reason; Phase 3.8 skips test-suite comparison
+       but still runs the build/lint.
+     - **Cancel** → stop.
+   - `status: DEFERRED_TO_HUMAN` → surface the deferred findings via `ask_user` and resolve
+     before proceeding to Phase 3.8.
+
+---
+
+## Phase 3.8 — Verify (Tests + Regression Check)
+
+Run the full test suite and compare against the Phase 2.6 baseline.
+
+> **Skip** if the user explicitly chose "Proceed without tests" in Phase 3.7.
+> In that case, still run the build/lint and record `tests: skipped — no framework` in
+> the Phase 5 report.
+
+1. Invoke `test-baseliner` in `verify` mode, passing the Phase 2.6 baseline:
+   ```
+   task(
+     agent_type: "test-baseliner",
+     mode:       "sync",
+     description:"Test verification (post-impl)",
+     prompt:     "## Test Baseline Request
+                  repo: <absolute-repo-root>
+                  mode: verify
+                  baseline:
+                    passing_count: <N from Phase 2.6>
+                    passing_tests: [<list from Phase 2.6>]
+                  <model_routing block>"
+   )
+   ```
+2. Evaluate the result:
+   - `status: OK` **and** all new tests from Phase 3.7 pass → proceed to Phase 4.
+   - `status: REGRESSIONS` (baseline tests now failing):
+     - Fix the regressions using the current model. Do not add complexity beyond
+       restoring the baseline.
+     - For `SIGNIFICANT` / `HIGH-RISK`: if production code was changed during regression
+       fixing, run a **single** re-review cycle (re-invoke Phase 3.5 once, then
+       `review-fixer` once). Do not loop again.
+     - Re-run Phase 3.8 once after fixes. If regressions persist, surface to the user
+       and stop.
+   - New tests from Phase 3.7 fail (test code issue, not a prod bug):
+     - Fix the test code and re-run Phase 3.8 once.
+     - If tests still fail after one fix attempt, surface to the user.
+   - `status: RUN_FAILED` → surface to the user and ask how to proceed.
+
+> **Cap: one remediation cycle + one re-review cycle maximum.**
+> Do not loop beyond this — surface to user if the suite is still red.
 
 ---
 
@@ -285,6 +404,12 @@ Conclude with a structured report (no questions):
 ### Commands / tests run
 - [command] → [result]
 
+### Tests written (Phase 3.7)
+- framework: [detected framework | none]
+- files_created: [list, or "none"]
+- files_modified: [list, or "none"]
+- status: [OK | NO_TESTS | COMMAND_NOT_FOUND | skipped — user chose to proceed without tests]
+
 ### Knowledge Base
 - [file updated/created] — [summary of entry] OR "no update required"
 
@@ -329,3 +454,8 @@ Conclude with a structured report (no questions):
 - ALWAYS check for a clean working tree before branching; stash or get explicit user consent if dirty.
 - ALWAYS use `review-fixer` sub-agent (not inline fixes) to resolve BLOCKER findings after Opus review.
 - NEVER run a second review-fixer cycle if the re-review still BLOCKs — surface to user instead.
+- ALWAYS capture a test baseline (Phase 2.6) on the new branch before writing any code.
+- ALWAYS invoke `test-writer` (Phase 3.7) for code changes — never skip test-writing silently.
+- NEVER skip test-writing if no framework is detected — surface `NO_TESTS` / `COMMAND_NOT_FOUND` to the user explicitly.
+- ALWAYS verify the full test suite against the baseline (Phase 3.8) before proceeding to Phase 4.
+- NEVER activate for `impl:docs:` prompts — redirect to the `impl-docs` skill immediately.

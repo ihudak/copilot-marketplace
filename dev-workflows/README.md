@@ -14,7 +14,8 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 
 | Trigger | Skill | Description |
 |---------|-------|-------------|
-| `impl:` | impl | Implement a feature or fix from a spec. Creates a feature branch, runs risk-weighted planning (Opus for complex tasks), implements with TDD, runs Opus code-review, applies fixes via `review-fixer`, commits and optionally opens a PR. |
+| `impl:` / `impl:code:` | impl | Implement a feature or fix from a spec. Creates a feature branch, captures a test baseline, runs risk-weighted planning (Opus critique for complex tasks), implements, runs Opus code-review (SIGNIFICANT/HIGH-RISK), writes tests for changed behaviour via `test-writer`, verifies no regressions, and runs post-impl maintenance. `impl:` is a silent alias for `impl:code:`. |
+| `impl:docs:` | impl-docs | Implement documentation-only changes (Markdown, READMEs, wikis, Obsidian vault, etc.). Lightweight: no branch by default, no tests, no code-review. Redirects to `impl:code:` if source code changes are detected. |
 | `fix-vuln:` | fix-vuln | Remediate one or more CVEs. Researches each CVE via NVD, applies the minimal safe version bump, verifies tests, applies Opus code-review, runs post-batch maintenance. Each CVE gets its own branch and PR. |
 | `upgrade:` | upgrade | Upgrade one or more dependencies to a target version. Creates an upgrade branch, captures test baseline, plans compatibility per-component, upgrades and verifies in sequence, applies Opus code-review, runs post-batch maintenance. |
 
@@ -22,7 +23,8 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 
 | Skill | Role |
 |-------|------|
-| test-baseliner | Captures test baseline before a change; compares after; returns regression report |
+| test-baseliner | Captures test baseline before a change; compares after; returns regression report. Used by `impl:code:`, `upgrade-executor`, and `vuln-fixer`. |
+| test-writer | Writes or updates tests for newly added or changed code behaviour. Used by `impl:code:` (Phase 3.7). Returns a Test Report with framework detection, files created/modified, and status. |
 | impl-maintenance | Post-implementation maintenance: updates knowledge base, copilot-instructions, and project docs |
 | upgrade-planner | Plans a single component upgrade: resolves target version, checks compatibility |
 | upgrade-executor | Executes a single planned upgrade: applies change, builds, verifies tests, auto-fixes test breakage |
@@ -44,9 +46,10 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 
 ## Feature highlights
 
-- **Branch-per-change**: `impl:` and `upgrade:` create a feature branch before touching code; `fix-vuln:` creates one per CVE
-- **Opus code-review gate**: every workflow runs an Opus review before committing; `review-fixer` sub-agent auto-applies fixable findings
-- **Post-batch maintenance**: after `fix-vuln:` and `upgrade:` batches, `impl-maintenance` updates the project knowledge base, `copilot-instructions.md`, and docs
+- **Branch-per-change**: `impl:code:` and `upgrade:` create a feature branch before touching code; `fix-vuln:` creates one per CVE. `impl:docs:` works on the current branch by default.
+- **Test-writing gate**: `impl:code:` writes tests for all new/changed behaviour via `test-writer` (Phase 3.7) and verifies no regressions against a pre-impl baseline (Phase 3.8). No test framework? The workflow asks — it never silently skips.
+- **Opus code-review gate**: every code workflow runs an Opus review before committing for SIGNIFICANT/HIGH-RISK tasks; `review-fixer` sub-agent auto-applies fixable findings
+- **Post-batch maintenance**: after all workflows, `impl-maintenance` updates the project knowledge base, `copilot-instructions.md`, and docs
 - **Stateless sub-agents**: all sub-agents receive full context in their prompt — no hidden state between calls
 
 ## License
