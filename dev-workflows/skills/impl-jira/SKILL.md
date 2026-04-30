@@ -371,10 +371,10 @@ repo_path: /repos/<repo>
 capability_themes: <list from jira-reader.themes>
 context: |
   <3–5 sentences from jira-reader.value_increment.goal + Epic context>
-search_hints:
-  symbols:  <from jira-reader.search_hints.symbols if present>
-  paths:    <from jira-reader.search_hints.paths if present>
-  keywords: <from jira-reader.search_hints.keywords if present>
+search_hints:                    # optional; derive from VI/Epic text if useful
+  symbols:  <derived class/function names hinted by VI description, if any>
+  paths:    <directory globs hinted by VI text, if any>
+  keywords: <extra grep terms beyond capability_themes, if any>
 refresh:
   switch_to_default_branch: <true if "fetch+pull default branch"; false if "fetch only" or "no refresh">
   pull: <true if "fetch+pull default branch"; false otherwise>
