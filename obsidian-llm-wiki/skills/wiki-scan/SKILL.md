@@ -12,9 +12,7 @@ allowed-tools: view, edit, create, bash, glob, grep
 
 Read `~/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/wiki-schema/SKILL.md` fully before proceeding.
 
-Both forms invoke this skill identically:
-- Claude Code: `/wiki-scan [directory]`
-- Copilot: `wiki-scan: [directory]`
+Invoke with: `/wiki-scan [directory]`
 
 If no directory argument is given, scan all Layer 1 directories plus `.raw/`.
 
@@ -42,7 +40,7 @@ If a directory argument was given, scan only that directory tree.
 
 ## Step 2 — Read _manifest.json
 
-Read `Knowledge/wiki/_manifest.json`. If it does not exist, treat all files as new.
+Read `wiki/_manifest.json`. If it does not exist, treat all files as new.
 
 ---
 

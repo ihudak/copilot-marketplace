@@ -194,3 +194,18 @@ On any other machine, `copilot plugin install dev-workflows@ihudak-copilot-plugi
 5. Add `LICENSE` and `README.md`
 6. **Add an entry to `.github/plugin/marketplace.json`** under `plugins`
 7. Register in `settings.json` under `enabledPlugins`: `"<plugin-name>@ihudak-copilot-plugins": true`
+
+## Behavioral guardrails (Karpathy) — project-specific notes
+
+The full four principles live in `~/.copilot/copilot-instructions.md` (user scope).
+This section only adds notes specific to this marketplace.
+
+- **Goal-Driven Execution** maps directly onto the existing `test-baseliner` →
+  implementation → `test-writer` → re-run flow already enforced by `dev-workflows`.
+  When invoking those orchestrators, frame the task as a verifiable goal up front
+  so the test gates have something concrete to verify against.
+- **Surgical Changes** — when editing skill YAML, SKILL.md frontmatter, or shared
+  references under `_shared/`, the orphan-cleanup rule applies in both directions:
+  if you remove a `model_routing` field or a phase, also remove every cross-skill
+  reference to it in the same change. Stale cross-references between
+  orchestrators and sub-agents silently break the workflow.

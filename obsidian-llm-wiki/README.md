@@ -2,7 +2,7 @@
 
 LLM Wiki pattern for an active Obsidian vault. Compiles knowledge from meetings,
 projects, daily notes, and raw sources into a persistent, cross-referenced wiki at
-`Knowledge/wiki/`. Supports both GitHub Copilot (natural language prefixes) and
+`wiki/`. Supports both GitHub Copilot (natural language prefixes) and
 Claude Code (slash commands) as first-class agents.
 
 ## Installation
@@ -49,7 +49,7 @@ copilot plugin install obsidian-llm-wiki@ihudak-copilot-plugins
 ## Boundary Rules
 
 Wiki operations never write to: `Meetings/`, `Daily/`, `Projects/`, `Customers/`,
-`People/`, `Clippings/`, `Research/`. All wiki output goes to `Knowledge/wiki/`.
+`People/`, `Clippings/`, `Research/`. All wiki output goes to `wiki/`.
 
 ## Claude Code
 

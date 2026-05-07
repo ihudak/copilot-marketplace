@@ -37,23 +37,24 @@ cross-linking rules, and file formats.
 
 ---
 
-## Natural Language Prefixes
+## Commands
 
-All commands are invoked as natural language prefixes. Use the exact prefix to trigger
-the correct workflow.
+| Slash command | Description |
+|---------------|-------------|
+| `/wiki-ingest @filepath` | Ingest one source file into the wiki |
+| `/wiki-scan [directory]` | Scan directory for unprocessed files, batch-ingest new/changed |
+| `/wiki-query <question>` | Answer from the compiled wiki with citations |
+| `/wiki-save` | Save current conversation as a wiki page |
+| `/wiki-lint` | Run wiki health check, produce lint report |
+| `/wiki-hot` | Manually refresh the hot cache |
+| `/wiki-tags-refresh` | Sync wiki tags with vault's tag-index.md |
+| `/wiki-init` | Initialize or re-initialize vault integration (first run or after plugin update) |
 
-| Prefix | Skill | Description |
-|--------|-------|-------------|
-| `wiki-ingest: @filepath` | wiki-ingest | Ingest one source file into the wiki |
-| `wiki-scan: [directory]` | wiki-scan | Scan directory for unprocessed files, batch-ingest new/changed |
-| `wiki-query: <question>` | wiki-query | Answer from the compiled wiki with citations |
-| `wiki-save:` | wiki-save | Save current conversation as a wiki page |
-| `wiki-lint:` | wiki-lint | Run wiki health check, produce lint report |
-| `wiki-hot:` | wiki-hot | Manually refresh the hot cache |
-| `wiki-tags-refresh:` | wiki-tags-refresh | Sync wiki tags with vault's tag-index.md |
-| `wiki-init:` | wiki-init | Initialize or re-initialize vault integration (first run or after plugin update) |
+Both Copilot and Claude Code use the same `/wiki-*` slash commands. Natural language
+variants (e.g. `wiki-lint:`) still work via description matching but are not the
+recommended form.
 
-When the user types any of these prefixes, read the corresponding skill file fully
+When the user types any of these commands, read the corresponding skill file fully
 before executing. Skill files are at `skills/<skill-name>/SKILL.md` relative to the
 plugin installation directory.
 
@@ -61,19 +62,8 @@ plugin installation directory.
 
 ## Command Equivalence
 
-Every natural language prefix has an identical Claude Code slash command. Both produce
-the same output and operate on the same wiki files. There is no behavioural difference between the two agents.
-
-| Copilot prefix | Claude Code slash command |
-|----------------|--------------------------|
-| `wiki-ingest:` | `/wiki-ingest` |
-| `wiki-scan:` | `/wiki-scan` |
-| `wiki-query:` | `/wiki-query` |
-| `wiki-save:` | `/wiki-save` |
-| `wiki-lint:` | `/wiki-lint` |
-| `wiki-hot:` | `/wiki-hot` |
-| `wiki-tags-refresh:` | `/wiki-tags-refresh` |
-| `wiki-init:` | `/wiki-init` |
+Both Copilot and Claude Code use the same `/wiki-*` slash commands with identical
+behaviour. No agent-specific forms are needed.
 
 ---
 

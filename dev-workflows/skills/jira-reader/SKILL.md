@@ -29,7 +29,7 @@ model_routing:
   # ... rest of block from orchestrator
 ```
 
-- `depth: full` — read every linked item under `<vault_path>/_archive/jira-products/<jira_key>/`
+- `depth: full` — read every linked item under `<vault_path>/jira-products/<jira_key>/`
 - `depth: vi-only` — read only the VI's own file (`<KEY>.md`) plus the index
 
 ---
@@ -38,9 +38,9 @@ model_routing:
 
 ### Step 1 — Validate paths
 
-1. Check `<vault_path>/_archive/jira-products/<jira_key>/` exists.
+1. Check `<vault_path>/jira-products/<jira_key>/` exists.
    - If missing → return `status: NOT_FOUND` immediately.
-2. Locate `<vault_path>/_archive/jira-products/<jira_key>/<jira_key>-index.md`.
+2. Locate `<vault_path>/jira-products/<jira_key>/<jira_key>-index.md`.
    - If missing → return `status: EMPTY` with a note.
 
 ### Step 2 — Parse the index file
@@ -57,13 +57,13 @@ Also note the `<jira_key>` itself as the root item.
 ### Step 3 — Read item files
 
 **If `depth: vi-only`:**
-- Read only `<vault_path>/_archive/jira-products/<jira_key>/<jira_key>/<jira_key>.md`
+- Read only `<vault_path>/jira-products/<jira_key>/<jira_key>/<jira_key>.md`
 - Parse frontmatter and description. Extract PR URLs.
 
 **If `depth: full`:**
 - For every item in the index (plus the root VI itself), attempt to read:
-  - `<vault_path>/_archive/jira-products/<jira_key>/<ITEM_KEY>/<ITEM_KEY>.md` (main file)
-  - `<vault_path>/_archive/jira-products/<jira_key>/<ITEM_KEY>/<ITEM_KEY>-comments.md` (if present)
+  - `<vault_path>/jira-products/<jira_key>/<ITEM_KEY>/<ITEM_KEY>.md` (main file)
+  - `<vault_path>/jira-products/<jira_key>/<ITEM_KEY>/<ITEM_KEY>-comments.md` (if present)
 - For each main file: parse YAML frontmatter fields (`key`, `issue_type`, `status`, `summary`, `parent`, `team`, `fix_versions`, `resolution`, and any others present). Extract the Description section body.
 - If a file is absent, skip gracefully — record `not_found: true` on that item.
 

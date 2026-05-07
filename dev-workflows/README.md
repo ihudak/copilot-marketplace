@@ -33,7 +33,7 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 | vuln-research | Read-only CVE research: NVD lookup, library detection, minimum safe version resolution |
 | vuln-fixer | Applies a CVE fix: captures baseline, bumps version, rebuilds, verifies tests, commits, opens PR |
 | review-fixer | Receives Opus code-review output; applies BLOCKER and MAJOR locally-actionable findings in one cycle |
-| jira-reader | Read-only: parses `$VAULT_PATH/_archive/jira-products/<KEY>/` Jira exports. Returns structured handoff with VI summary, linked items, PR URLs with provenance, and capability themes. Used by `impl:jira:` (Phase 3). |
+| jira-reader | Read-only: parses `$VAULT_PATH/jira-products/<KEY>/` Jira exports. Returns structured handoff with VI summary, linked items, PR URLs with provenance, and capability themes. Used by `impl:jira:` (Phase 3). |
 | diff-summarizer | Use case A: given a repo path and a set of PR identifiers, resolves each PR against local git refs (4 strategies: PR ref, branch search, merge commit, issue grep) and produces prose diff summaries. Pure local git — no HTTPS. Used by `impl:jira:docs:` (Phase 5, parallel). |
 | code-scanner | Use case B: given a repo path and capability themes, scans the filesystem with rg/glob/view to classify each theme as present/partial/absent and produce a gap summary for Epic writing. Used by `impl:jira:epics:` (Phase 5, parallel). |
 

@@ -78,12 +78,12 @@ ask_user(
 )
 ```
 
-4. Validate that `<VAULT_PATH>/_archive/jira-products/<JIRA_KEY>/` exists.
+4. Validate that `<VAULT_PATH>/jira-products/<JIRA_KEY>/` exists.
    - If it does not:
 
 ```
 ask_user(
-  question: "Jira export directory not found: <VAULT_PATH>/_archive/jira-products/<JIRA_KEY>/. How would you like to proceed?",
+  question: "Jira export directory not found: <VAULT_PATH>/jira-products/<JIRA_KEY>/. How would you like to proceed?",
   choices: [
     "Re-enter the Jira key",
     "Cancel",

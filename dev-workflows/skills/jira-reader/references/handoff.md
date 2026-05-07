@@ -62,6 +62,6 @@ notes: |
 
 | Status     | Meaning                                                                 |
 |------------|-------------------------------------------------------------------------|
-| `OK`       | Successfully read; `linked_items` and `pull_requests` populated.       |
+| `OK`       | Successfully read; `linked_items` and `pull_requests` populated.        |
 | `EMPTY`    | Directory found but index file is missing or empty.                     |
-| `NOT_FOUND`| `<vault_path>/_archive/jira-products/<jira_key>/` does not exist.      |
+| `NOT_FOUND`| `<vault_path>/jira-products/<jira_key>/` does not exist.                |

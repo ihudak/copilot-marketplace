@@ -3,7 +3,7 @@ name: wiki-save
 description: >
   Save the current conversation or a specific insight as a permanent wiki page.
   Determines the best page type, drafts the page, shows it for approval, then writes
-  it to Knowledge/wiki/ and updates _index.md, _log.md, and hot.md.
+  it to wiki/ and updates _index.md, _log.md, and hot.md.
   Triggers on: wiki-save, save this to the wiki, save this conversation, file this
   insight, add this to the wiki, wiki save, keep this.
 allowed-tools: view, edit, create, bash, glob, grep
@@ -13,9 +13,7 @@ allowed-tools: view, edit, create, bash, glob, grep
 
 Read `~/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/wiki-schema/SKILL.md` fully before proceeding.
 
-Both forms invoke this skill identically:
-- Claude Code: `/wiki-save`
-- Copilot: `wiki-save:`
+Invoke with: `/wiki-save`
 
 ---
 
@@ -100,7 +98,7 @@ Only write to disk on explicit **yes**.
 
 ## Step 7 — Write the page
 
-Write to `Knowledge/wiki/<type-folder>/<title>.md`.
+Write to `wiki/<type-folder>/<title>.md`.
 
 ---
 

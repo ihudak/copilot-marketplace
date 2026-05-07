@@ -1,6 +1,6 @@
 {
   "name": "obsidian-llm-wiki",
-  "description": "LLM Wiki pattern for an active Obsidian vault. Seven skills (wiki-ingest, wiki-scan, wiki-query, wiki-save, wiki-lint, wiki-hot, wiki-tags-refresh) compile knowledge from meetings, projects, daily notes, and raw sources into a persistent, cross-referenced wiki at Knowledge/wiki/. Supports GitHub Copilot and Claude Code as first-class agents.",
+  "description": "LLM Wiki pattern for an active Obsidian vault. Seven skills (wiki-ingest, wiki-scan, wiki-query, wiki-save, wiki-lint, wiki-hot, wiki-tags-refresh) compile knowledge from meetings, projects, daily notes, and raw sources into a persistent, cross-referenced wiki at wiki/. Supports GitHub Copilot and Claude Code as first-class agents.",
   "version": "0.1.0",
   "author": {
     "name": "Ivan Gudak",
