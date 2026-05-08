@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Fires on every message submission. Injects git context for impl:, vuln:, upgrade: commands.
-# Exits immediately (near-zero overhead) if the message doesn't match.
+# Fires on every message submission. Injects git context for /impl, /vuln, /upgrade slash
+# commands and impl:/vuln:/upgrade: prefix forms. Exits immediately if neither matches.
 # Always exits 0 — must never block Copilot.
 
 # Guard: if python3 is not available, skip silently
@@ -16,8 +16,8 @@ except Exception:
     print('')
 " 2>/dev/null) || true
 
-# Match Copilot prefixes: impl:, impl:code:, impl:docs:, impl:jira:, vuln:, upgrade:
-if ! echo "$prompt" | grep -qE '^(impl:|impl:code:|impl:docs:|impl:jira:|vuln:|upgrade:)[[:space:]]+[^[:space:]-]'; then
+# Match both slash command form (/impl, /vuln, /upgrade) and legacy prefix form (impl:, vuln:, upgrade:)
+if ! echo "$prompt" | grep -qE '^(impl:|impl:code:|impl:docs:|impl:jira:|vuln:|upgrade:|/impl[[:space:]]|/vuln[[:space:]]|/upgrade[[:space:]])[[:space:]]*[^[:space:]-]'; then
     exit 0
 fi
 
