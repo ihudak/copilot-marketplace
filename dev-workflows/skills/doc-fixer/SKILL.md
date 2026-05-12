@@ -11,9 +11,10 @@ description: >
 # doc-fixer — Post-Review Documentation Fix Sub-Agent
 
 Receives the output of a `doc-reviewer` agent run (product docs), an
-`epic-reviewer` agent run (Epic drafts), or a `docs-style-checker` violations
-list, and applies targeted fixes for BLOCKER and MAJOR findings. The caller is
-responsible for re-running the reviewer / style check after this agent returns.
+`epic-reviewer` agent run (Epic drafts), a `docs-style-checker` violations list,
+or a `dt-style-checker` violations list (from the `dt-style-guide` plugin), and
+applies targeted fixes for BLOCKER and MAJOR findings. The caller is responsible
+for re-running the reviewer / style check after this agent returns.
 
 Analogous to `review-fixer` (code). Doc-type-agnostic because the finding
 schema — `file`, `line`, `severity`, `description`, `suggestion` — is the same
@@ -21,7 +22,7 @@ across `doc-reviewer`, `epic-reviewer`, and `docs-style-checker`.
 
 Do NOT invoke for PASS verdicts. Only invoke when the verdict is BLOCK or PASS
 WITH RECOMMENDATIONS and there are MAJOR findings to apply, or when
-`docs-style-checker` returned `status: VIOLATIONS_FOUND`.
+`docs-style-checker` or `dt-style-checker` returned `status: VIOLATIONS_FOUND`.
 
 ## Inputs
 

@@ -102,8 +102,8 @@ All orchestrators must load and follow `model-routing.md` at the start of every 
 ```
 impl:code: / impl:  → [risk-planner@Opus plan critique] → impl → [code-review@Opus] → review-fixer → test-writer → tests → impl-maintenance
 impl:docs:          → impl-docs → [doc-reviewer] → [doc-fixer] → impl-maintenance
-impl:jira:docs:     → impl-jira → jira-reader → [diff-summarizer×N (parallel)] → [doc-location-finder] → [doc-planner] → writing → [docs-style-checker] → [doc-fixer] → [doc-reviewer] → [doc-fixer] → impl-maintenance
-impl:jira:epics:    → impl-jira → jira-reader → [code-scanner×N (parallel, optional)] → writing → [docs-style-checker] → [doc-fixer] → [epic-reviewer@Opus] → [doc-fixer] → impl-maintenance
+impl:jira:docs:     → impl-jira → jira-reader → [diff-summarizer×N (parallel)] → [doc-location-finder] → [doc-planner] → writing → [docs-style-checker → dt-style-checker fallback] → [doc-fixer] → [doc-reviewer] → [doc-fixer] → impl-maintenance
+impl:jira:epics:    → impl-jira → jira-reader → [code-scanner×N (parallel, optional)] → writing → [dt-style-checker] → [doc-fixer] → [epic-reviewer@Opus] → [doc-fixer] → impl-maintenance
 fix-vuln:           → vuln-research → vuln-fixer → [code-review@Opus] → review-fixer → tests → impl-maintenance
 upgrade:            → upgrade-planner → upgrade-executor → [code-review@Opus] → review-fixer → tests → impl-maintenance
                     └── test-baseliner    (used by upgrade-executor, vuln-fixer, and impl:code:)
@@ -115,6 +115,7 @@ upgrade:            → upgrade-planner → upgrade-executor → [code-review@Op
                     └── doc-location-finder (used by impl:jira:docs: Phase 5.6)
                     └── doc-planner       (used by impl:jira:docs: Phase 5.7)
                     └── docs-style-checker (used by impl:jira: Phase 6.7)
+                    └── dt-style-checker  (from dt-style-guide plugin; fallback for docs-style-checker, primary for epics)
                     └── epic-reviewer     (used by impl:jira:epics: Phase 7)
 ```
 
@@ -146,7 +147,8 @@ Key invariants for `impl:jira:`:
 - Branch policy: walk up cwd for `.obsidian/` → `obsidian` (never branch); else `git rev-parse` → `git_repo` (branch opt-in) or `plain_dir` (never branch). User can override at plan approval
 - Phase 5.6 `doc-location-finder` (use case A only) identifies write targets before writing begins
 - Phase 5.7 `doc-planner` (use case A only) synthesises Jira + diffs into a documentation checklist
-- Phase 6.7 `docs-style-checker` + `doc-fixer` lint prose after writing, before review gate
+- Phase 6.7 `docs-style-checker` + `doc-fixer` lint prose after writing, before review gate; if no repo linter detected, falls back to `dt-style-checker` (from `dt-style-guide` plugin) when installed
+- Phase 6.7 (use case B / epics): `dt-style-checker` is the primary style checker (vault content has no repo linter); gracefully skipped if `dt-style-guide` not installed
 - Phase 7 review gate: `doc-reviewer` (use case A) or `epic-reviewer@Opus` (use case B); `doc-fixer` resolves BLOCKERs; cap 1 fix cycle + 1 re-review
 - Sub-agents return `DIRTY_TREE` / `REFRESH_BLOCKED` when they cannot refresh repos — orchestrator escalates to user; never silent failure
 - Every written claim must cite originating Jira key (`[[KEY]]`) + PR URL (use case A) or file path (use case B)
@@ -169,11 +171,15 @@ After editing files in this repo and pushing, update the installed copies on eac
 **Linux (this dev machine):**
 ```bash
 cp -r dev-workflows/. ~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/
+cp -r dt-style-guide/. ~/.copilot/installed-plugins/ihudak-copilot-plugins/dt-style-guide/
+cp -r obsidian-llm-wiki/. ~/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/
 ```
 
 **Windows (via WSL):**
 ```bash
 cp -r dev-workflows/. /mnt/c/Users/ivan.gudak/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/
+cp -r dt-style-guide/. /mnt/c/Users/ivan.gudak/.copilot/installed-plugins/ihudak-copilot-plugins/dt-style-guide/
+cp -r obsidian-llm-wiki/. /mnt/c/Users/ivan.gudak/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/
 ```
 
 On any other machine, `copilot plugin install dev-workflows@ihudak-copilot-plugins` handles everything natively after the marketplace is registered.

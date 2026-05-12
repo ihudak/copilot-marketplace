@@ -36,6 +36,11 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 | jira-reader | Read-only: parses `$VAULT_PATH/jira-products/<KEY>/` Jira exports. Returns structured handoff with VI summary, linked items, PR URLs with provenance, and capability themes. Used by `impl:jira:` (Phase 3). |
 | diff-summarizer | Use case A: given a repo path and a set of PR identifiers, resolves each PR against local git refs (4 strategies: PR ref, branch search, merge commit, issue grep) and produces prose diff summaries. Pure local git — no HTTPS. Used by `impl:jira:docs:` (Phase 5, parallel). |
 | code-scanner | Use case B: given a repo path and capability themes, scans the filesystem with rg/glob/view to classify each theme as present/partial/absent and produce a gap summary for Epic writing. Used by `impl:jira:epics:` (Phase 5, parallel). |
+| docs-style-checker | Wraps the docs repo's project-configured prose linter (Vale, markdownlint, remark); normalises output into the doc-fixer schema. Falls back to `dt-style-checker` (from `dt-style-guide` plugin) when no repo linter is configured. Used by `impl:jira:` (Phase 6.7). |
+| doc-fixer | Applies targeted fixes for BLOCKER and MAJOR findings from doc-reviewer, epic-reviewer, docs-style-checker, or dt-style-checker. Used by `impl:jira:` (Phases 6.7/7) and `impl:docs:` (Phase 3.5). |
+| doc-location-finder | Use case A: identifies write-target file paths in the docs repo before writing begins. Used by `impl:jira:docs:` (Phase 5.6). |
+| doc-planner | Use case A: synthesises Jira + diffs into a documentation checklist. Used by `impl:jira:docs:` (Phase 5.7). |
+| epic-reviewer | Reviews Epic drafts for goal clarity, acceptance-criteria testability, scope boundaries, and non-duplication. Pinned to Opus. Used by `impl:jira:epics:` (Phase 7). |
 
 ### Shared reference
 
@@ -53,6 +58,7 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 
 - **Branch-per-change**: `impl:code:` and `upgrade:` create a feature branch before touching code; `fix-vuln:` creates one per CVE. `impl:docs:` works on the current branch by default. `impl:jira:` branches when run from a git repo (opt-in at plan approval); never branches in an Obsidian vault.
 - **Jira-driven docs**: `impl:jira:docs:` and `impl:jira:epics:` read Obsidian vault Jira exports, resolve PR URLs as pure local-git identifiers (no Bitbucket REST API), run parallel diff-summarizers or code-scanners per repo, and produce documentation with mandatory inline Jira + PR citations.
+- **Style checking**: `impl:jira:docs:` runs the repo's own linter via `docs-style-checker`; if unconfigured, falls back to `dt-style-checker` (from the optional `dt-style-guide` plugin). `impl:jira:epics:` uses `dt-style-checker` directly for vault content. Both gracefully degrade if `dt-style-guide` is not installed.
 - **Test-writing gate**: `impl:code:` writes tests for all new/changed behaviour via `test-writer` (Phase 3.7) and verifies no regressions against a pre-impl baseline (Phase 3.8). No test framework? The workflow asks — it never silently skips.
 - **Opus code-review gate**: every code workflow runs an Opus review before committing for SIGNIFICANT/HIGH-RISK tasks; `review-fixer` sub-agent auto-applies fixable findings
 - **Post-batch maintenance**: after all workflows, `impl-maintenance` updates the project knowledge base, `copilot-instructions.md`, and docs

@@ -54,9 +54,31 @@ Refuse to run without `repo_root` and at least one entry in `files`.
    on PATH, run it on the target files. Set `linter: markdownlint` or
    `linter: remark`.
 
-4. **Nothing configured** — return `status: NOT_CONFIGURED`, `violations: []`.
-   The main command treats this as a no-op and proceeds straight to Phase 7
-   (doc-reviewer is still the correctness gate).
+4. **Nothing configured** — no project-level linter detected. Before returning
+   `NOT_CONFIGURED`, check if the `dt-style-guide` plugin is installed:
+
+   ```
+   Check if path exists: ~/.copilot/installed-plugins/ihudak-copilot-plugins/dt-style-guide/skills/dt-style-checker/SKILL.md
+   ```
+
+   - **If the file exists** — invoke `dt-style-checker` as a fallback:
+     - `agent_type: "general-purpose"`
+     - Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dt-style-guide/skills/dt-style-checker/SKILL.md`
+     - Pass input block:
+
+     ```yaml
+     files:    <the same files list from input>
+     doc_type: <infer from context: "product-docs" for docs repos, "general" otherwise>
+     ```
+
+     Map the `dt-style-checker` return into this agent's output schema:
+     - `dt-style-checker` returned violations → `status: VIOLATIONS_FOUND`, `linter: dt-style-checker`, `violations: <mapped>`
+     - `dt-style-checker` returned zero violations → `status: OK`, `linter: dt-style-checker`
+     - `dt-style-checker` errored → `status: ERROR`, `linter: dt-style-checker`, `error: <reason>`
+
+   - **If the file does not exist** — return `status: NOT_CONFIGURED`,
+     `violations: []`. The main command treats this as a no-op and proceeds
+     straight to Phase 7 (doc-reviewer is still the correctness gate).
 
 ## Violation schema
 

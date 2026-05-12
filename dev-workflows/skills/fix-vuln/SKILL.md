@@ -10,6 +10,7 @@ description: >
   finds the minimal safe version, runs baseline tests, applies the fix, rebuilds,
   re-runs tests, then commits to a new branch and opens a pull request.
   Use when the user wants to remediate one or more security vulnerabilities in the current repository.
+allowed-tools: view, edit, create, bash, glob, grep, ask_user, sql
 ---
 
 # Fix Vulnerabilities

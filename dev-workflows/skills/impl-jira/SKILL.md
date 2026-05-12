@@ -678,7 +678,11 @@ files:     <absolute paths of every file written or modified in Phase 6>
 
 Act on the return:
 
-- **`status: NOT_CONFIGURED`** — no repo linter detected. Proceed to Phase 7 (no corporate style fallback in Copilot version). `doc-reviewer` will still check correctness/completeness.
+- **`status: NOT_CONFIGURED`** — no repo linter detected. `docs-style-checker`
+  will automatically attempt a `dt-style-checker` fallback if the
+  `dt-style-guide` plugin is installed (see docs-style-checker detection step 4).
+  If `dt-style-checker` also returns `NOT_CONFIGURED` (plugin not installed),
+  proceed to Phase 7. `doc-reviewer` will still check correctness/completeness.
 - **`status: OK`** — linter ran, zero violations. Proceed to Phase 7.
 - **`status: VIOLATIONS_FOUND`** — invoke `doc-fixer` sub-agent:
 
@@ -709,9 +713,47 @@ Act on the return:
   )
   ```
 
-### Use case B — skip docs-style-checker
+### Use case B — dt-style-checker for Epics
 
-For Epics (vault content), `docs-style-checker` is skipped (no repo linter for vault content). Proceed directly to Phase 7.
+For Epics (vault content), `docs-style-checker` is skipped (no repo linter for
+vault content). Instead, check if the `dt-style-guide` plugin is installed:
+
+```
+Check if path exists: ~/.copilot/installed-plugins/ihudak-copilot-plugins/dt-style-guide/skills/dt-style-checker/SKILL.md
+```
+
+**If installed** — invoke `dt-style-checker` directly:
+
+- `agent_type: "general-purpose"`
+- Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dt-style-guide/skills/dt-style-checker/SKILL.md`
+- Pass input block:
+
+```yaml
+files:    <absolute paths of every Epic file written in Phase 6>
+doc_type: epic
+```
+
+Act on the return:
+
+- **Zero violations** — proceed to Phase 7.
+- **Violations found** — invoke `doc-fixer` sub-agent (same pattern as use case A
+  above, passing `dt-style-checker` output as the style-checker report). After
+  `doc-fixer` completes, re-run `dt-style-checker` once. If violations remain:
+  ```
+  ask_user(
+    question: "Style check still has violations after one fix cycle. How would you like to proceed?",
+    choices: ["Proceed to review anyway — reviewer may still PASS", "Show remaining violations and let me fix manually", "Cancel"]
+  )
+  ```
+- **Error** — surface the error reason:
+  ```
+  ask_user(
+    question: "dt-style-checker encountered an error: <reason>. How would you like to proceed?",
+    choices: ["Proceed to review without style check", "Cancel and fix locally"]
+  )
+  ```
+
+**If not installed** — proceed directly to Phase 7 (existing behaviour preserved).
 
 ---
 
@@ -885,5 +927,7 @@ If branch was created:
 | `doc-planner` with gaps | Per-gap prompt based on `recommended_action`; checklist approval with "Approve & write", "Adjust", "Cancel" |
 | `docs-style-checker` VIOLATIONS after fix | "Proceed to review anyway", "Show remaining violations and let me fix manually", "Cancel" |
 | `docs-style-checker` ERROR | "Proceed to review without style check", "Cancel and fix locally" |
+| `dt-style-checker` VIOLATIONS after fix (use case B) | "Proceed to review anyway", "Show remaining violations and let me fix manually", "Cancel" |
+| `dt-style-checker` ERROR (use case B) | "Proceed to review without style check", "Cancel and fix locally" |
 | `doc-reviewer` or `epic-reviewer` BLOCKERS after one fix cycle | Per-BLOCKER: "Provide manual fix notes", "Defer", "Override", "Cancel the whole run" |
 | Output file already exists | "Overwrite", "Write to <path-v2>.md", "Cancel" |

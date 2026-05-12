@@ -7,6 +7,7 @@ Ivan Gudak's private GitHub Copilot plugin marketplace.
 | Plugin | Description |
 |--------|-------------|
 | [dev-workflows](dev-workflows/) | Structured development workflow skills: `impl:` for feature implementation, `fix-vuln:` for CVE remediation, `upgrade:` for dependency upgrades — with Opus review gate and parallel subagent execution |
+| [dt-style-guide](dt-style-guide/) | Dynatrace corporate style guide enforcement: `dt-review-pr`, `dt-review-docs`, `dt-style-refresh`, and sub-agents used by `dev-workflows` for style checking Epics and feature docs |
 | [obsidian-llm-wiki](obsidian-llm-wiki/) | Seven natural language prefixes for compiling Obsidian vault knowledge into a persistent, cross-referenced wiki; supports GitHub Copilot and Claude Code |
 
 ## Installation
@@ -21,6 +22,7 @@ copilot plugin marketplace add ivan-gudak/ihudak-copilot-plugins
 
 ```bash
 copilot plugin install dev-workflows@ihudak-copilot-plugins
+copilot plugin install dt-style-guide@ihudak-copilot-plugins
 copilot plugin install obsidian-llm-wiki@ihudak-copilot-plugins
 ```
 
@@ -36,6 +38,17 @@ ihudak-copilot-plugins/
 │       ├── fix-vuln/
 │       ├── upgrade/
 │       └── <sub-agents>
+├── dt-style-guide/
+│   ├── .plugin/plugin.json
+│   ├── README.md
+│   ├── references/          ← vendored Dynatrace style guide rules
+│   └── skills/
+│       ├── dt-style-checker/
+│       ├── dt-doc-fixer/
+│       ├── dt-review-pr/
+│       ├── dt-review-docs/
+│       ├── dt-style-refresh/
+│       └── dt-style-rules/
 ├── obsidian-llm-wiki/
 │   ├── .plugin/plugin.json
 │   ├── README.md

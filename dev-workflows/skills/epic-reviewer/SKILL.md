@@ -20,10 +20,11 @@ drafted one `.md` file per Epic under the resolved output directory (default
 `BLOCK` verdict means "fix the blocking issue before Phase 8 maintenance and
 the final report".
 
-Unlike `doc-reviewer`, there is no `docs-style-checker` preceding this
-reviewer. Epic drafts are vault-internal and not subject to product-docs prose
-linting — corporate style compliance matters at product-docs publication time,
-not at Epic scoping time.
+When the `dt-style-guide` plugin is installed, `dt-style-checker` runs on Epic
+drafts in Phase 6.7 before this reviewer is invoked. Unlike product docs (which
+use `docs-style-checker` wrapping the repo's own linter), Epic style checking
+uses `dt-style-checker` directly because vault content has no repo-level linter.
+If `dt-style-guide` is not installed, this reviewer is the first quality gate.
 
 ## Inputs
 

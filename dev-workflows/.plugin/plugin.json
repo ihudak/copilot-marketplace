@@ -3,7 +3,7 @@
   "description": "Structured development workflow skills for implementing features, fixing vulnerabilities, and upgrading dependencies — with branch management, Opus review, and automated maintenance.",
   "version": "1.2.0",
   "author": {
-    "name": "Ivan Hudak",
+    "name": "Ivan Gudak",
     "url": "https://github.com/ihudak"
   },
   "homepage": "https://github.com/ihudak/ihudak-copilot-plugins/tree/main/dev-workflows",

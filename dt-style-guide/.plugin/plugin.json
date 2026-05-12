@@ -1,0 +1,22 @@
+{
+  "name": "dt-style-guide",
+  "description": "Dynatrace corporate style guide — vendored terminology, trademarks, voice/tone, grammar, and formatting rules with a dt-style-checker sub-agent, a dt-doc-fixer sub-agent, a dt-style-rules skill, three orchestrator commands (dt-style-refresh, dt-review-pr, dt-review-docs), and vendored reference docs. Acts as a fallback for dev-workflows when no repo-configured prose linter (Vale) is available.",
+  "version": "0.2.0",
+  "author": {
+    "name": "Ivan Gudak",
+    "url": "https://github.com/ihudak"
+  },
+  "homepage": "https://github.com/ihudak/ihudak-copilot-plugins/tree/main/dt-style-guide",
+  "repository": "https://github.com/ihudak/ihudak-copilot-plugins",
+  "license": "MIT",
+  "keywords": [
+    "dynatrace",
+    "style-guide",
+    "terminology",
+    "voice-and-tone",
+    "documentation",
+    "linting",
+    "writing"
+  ],
+  "skills": "./skills/"
+}

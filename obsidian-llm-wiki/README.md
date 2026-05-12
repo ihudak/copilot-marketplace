@@ -25,6 +25,7 @@ copilot plugin install obsidian-llm-wiki@ihudak-copilot-plugins
 
 | Prefix | Description |
 |--------|-------------|
+| `wiki-init:` | Initialize or re-initialize vault integration for the wiki |
 | `wiki-ingest: @filepath` | Ingest one source file into the wiki |
 | `wiki-scan: [directory]` | Scan directory for unprocessed files; batch-ingest new/changed |
 | `wiki-query: <question>` | Answer from the compiled wiki with citations |
@@ -37,6 +38,7 @@ copilot plugin install obsidian-llm-wiki@ihudak-copilot-plugins
 
 | Skill | Trigger |
 |-------|---------|
+| wiki-init | `wiki-init:` |
 | wiki-ingest | `wiki-ingest:` |
 | wiki-scan | `wiki-scan:` |
 | wiki-query | `wiki-query:` |
@@ -51,11 +53,12 @@ copilot plugin install obsidian-llm-wiki@ihudak-copilot-plugins
 Wiki operations never write to: `Meetings/`, `Daily/`, `Projects/`, `Customers/`,
 `People/`, `Clippings/`, `Research/`. All wiki output goes to `wiki/`.
 
-## Claude Code
+## Claude Code (sister plugin)
 
-Identical slash commands are available via the
+The same wiki skills are also available as Claude Code slash commands in the
 [ihudak-claude-plugins](https://github.com/ihudak/ihudak-claude-plugins/tree/main/plugins/obsidian-llm-wiki)
-entry. Both agents write to the same wiki — switching mid-session is seamless.
+marketplace (a separate repository). Both agents write to the same `wiki/`
+directory — switching between Copilot and Claude mid-session is seamless.
 
 ## License
 

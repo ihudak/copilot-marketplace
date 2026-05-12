@@ -17,9 +17,15 @@
       "version": "1.2.0"
     },
     {
+      "name": "dt-style-guide",
+      "source": "dt-style-guide",
+      "description": "Dynatrace corporate style guide enforcement: terminology, trademarks, voice/tone, grammar, and formatting rules for product docs, Epics, PRDs, and ARDs.",
+      "version": "0.2.0"
+    },
+    {
       "name": "obsidian-llm-wiki",
       "source": "obsidian-llm-wiki",
-      "description": "LLM Wiki pattern for an active Obsidian vault. Eight skills (/wiki-init, /wiki-ingest, /wiki-scan, /wiki-query, /wiki-save, /wiki-lint, /wiki-hot, /wiki-tags-refresh) for ingesting, querying, saving, linting, and managing a persistent wiki compiled from meetings, projects, and daily notes.",
+      "description": "LLM Wiki pattern for an active Obsidian vault. Nine skills (wiki-init, wiki-ingest, wiki-scan, wiki-query, wiki-save, wiki-lint, wiki-hot, wiki-tags-refresh, wiki-schema) for ingesting, querying, saving, linting, and managing a persistent wiki compiled from meetings, projects, and daily notes.",
       "version": "0.1.0"
     }
   ]

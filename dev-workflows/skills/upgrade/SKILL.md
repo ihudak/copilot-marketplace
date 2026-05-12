@@ -8,6 +8,7 @@ description: >
   language or ecosystem. Upgrades are applied to the current branch with no commits or PRs.
   Runs tests before and after each upgrade; updates test code if required by the new version.
   Use when the user wants to keep dependencies, frameworks, languages, or CI/CD actions current.
+allowed-tools: view, edit, create, bash, glob, grep, ask_user, sql
 ---
 
 # Upgrade Components
