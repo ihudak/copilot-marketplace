@@ -104,7 +104,7 @@ the orchestrator explicitly overrides via the `task` tool's `model` argument.
 - Continue with the currently selected model.
 - Do **not** add mandatory Opus steps.
 - Proceed with normal planning, implementation, testing, and fixes.
-- Skip the dedicated Opus code review (the standard `rubber-duck` consult
+- Skip the dedicated Opus code review (the standard `risk-planner` consult
   — when called — uses the workflow's default model selection).
 
 ### 3.2 SIGNIFICANT / HIGH-RISK — mandatory sequence
@@ -176,6 +176,11 @@ Sub-agents that receive a `model_routing` block:
   then running the review, then invoking the executor/fixer again to run tests.
   Equivalently, the orchestrator may invoke a single combined call with a
   `gate_tests_on_review: true` flag — both styles are acceptable.
+- `risk-planner`, `code-review`, `epic-reviewer`: the orchestrator pins these to
+  the §2 fallback chain via the `task` tool's `model:` argument. They receive
+  the `model_routing` block for context validation and reporting.
+- `doc-fixer`, `doc-location-finder`, `doc-planner`, `docs-style-checker`,
+  `doc-reviewer`: receive the block for reporting; behaviour is unchanged.
 - `test-baseliner`, `impl-maintenance`: receive the block for reporting only;
   behaviour is unchanged.
 
@@ -187,7 +192,7 @@ The CLI's `task` tool accepts an explicit `model:` override. Use it like this:
 
 ```
 task(
-  agent_type: "rubber-duck"  | "code-review" | "general-purpose",
+  agent_type: "risk-planner"  | "code-review" | "general-purpose",
   model:      "claude-opus-4.7",   # or the highest available per §2
   prompt:     "<full self-contained context — sub-agent has no memory>",
   description:"Opus planning critique" | "Opus code review",
@@ -195,7 +200,7 @@ task(
 )
 ```
 
-- For **planning** on SIGNIFICANT/HIGH-RISK tasks, prefer `agent_type: "rubber-duck"`
+- For **planning** on SIGNIFICANT/HIGH-RISK tasks, prefer `agent_type: "risk-planner"`
   with Opus, asking it to critique the proposed plan.
 - For **post-implementation review** on SIGNIFICANT/HIGH-RISK tasks, use
   `agent_type: "code-review"` with Opus, passing the diff and §6 checklist.

@@ -26,7 +26,7 @@ MODEL_ROUTING="${PLUGIN_ROOT}/skills/_shared/model-routing.md"
 echo "=== Auto-injected project context ==="
 echo "Model routing: classify task as SIMPLE / MODERATE / SIGNIFICANT / HIGH-RISK before planning."
 echo "  SIGNIFICANT / HIGH-RISK -> use task tool with agent_type: general-purpose, model: claude-opus-4.7"
-echo "  for planning (rubber-duck) and code-review, BEFORE running tests."
+echo "  for planning (risk-planner) and code-review, BEFORE running tests."
 if [ -f "$MODEL_ROUTING" ]; then
     echo "  Full rules: $MODEL_ROUTING"
 fi

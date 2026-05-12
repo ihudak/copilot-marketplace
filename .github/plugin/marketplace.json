@@ -14,7 +14,7 @@
       "name": "dev-workflows",
       "source": "dev-workflows",
       "description": "Structured development workflow skills for implementing features, fixing vulnerabilities, and upgrading dependencies — with branch management, Opus review, and automated maintenance.",
-      "version": "1.0.0"
+      "version": "1.2.0"
     },
     {
       "name": "obsidian-llm-wiki",

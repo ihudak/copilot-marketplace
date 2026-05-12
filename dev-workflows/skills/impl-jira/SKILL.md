@@ -258,8 +258,8 @@ Produce a written plan containing:
 8. **Parallelism plan**: N diff-summarizer or code-scanner instances to be launched
 9. **Model routing block**
 
-If classification is SIGNIFICANT: run a `rubber-duck` sub-agent critique at this point
-(use `task` with `agent_type: "rubber-duck"`, `model: claude-opus-4.7` per model-routing.md).
+If classification is SIGNIFICANT: run a `risk-planner` sub-agent critique at this point
+(use `task` with `agent_type: "risk-planner"`, `model: claude-opus-4.7` per model-routing.md).
 Address every BLOCKER. Document CONCERNs in the plan. Then show the revised plan.
 
 Request approval:
@@ -469,6 +469,88 @@ Announce: `"Created branch: docs/<JIRA_KEY>-<slug>"`
 
 ---
 
+## Phase 5.6 — Locate Write Targets (use case A only)
+
+Skip this phase for use case B (Epics always write to `<cwd>/<JIRA_KEY>/<slug>.md`).
+
+Invoke `doc-location-finder` sub-agent:
+
+- `agent_type: "general-purpose"`
+- Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/doc-location-finder/SKILL.md`
+- Pass input block:
+
+```yaml
+repo_root:       <cwd's git root, resolved in Phase 0>
+feature_summary: <2–4 sentences combining jira-reader themes + value_increment.goal>
+diff_highlights:  <key filenames / symbols from the diff-summarizer per_pr summaries>
+```
+
+Handle the return:
+
+- **`status: OK`** with a populated `targets` list:
+  ```
+  ask_user(
+    question: "Doc-location-finder proposed these write targets:\n<formatted list>\nHow would you like to proceed?",
+    choices: ["Accept all proposed locations (Recommended)", "Adjust individual locations (you'll be prompted per item)", "Cancel"]
+  )
+  ```
+- **`status: LOW_CONFIDENCE`** — display `confidence_notes` alongside targets:
+  ```
+  ask_user(
+    question: "Doc-location-finder proposed targets with low confidence:\n<formatted list + notes>\nHow would you like to proceed?",
+    choices: ["Adjust individual locations (Recommended)", "Accept all proposed locations", "Cancel"]
+  )
+  ```
+- **`status: EMPTY`** — skip the accept/adjust flow:
+  ```
+  ask_user(
+    question: "Doc-location-finder could not determine write targets. How would you like to proceed?",
+    choices: ["Specify locations manually (you'll be prompted)", "Cancel"]
+  )
+  ```
+  The manual path takes a free-text entry per target (`path` + `kind` + `section`) and validates path existence for `extend-existing` targets.
+
+The confirmed target list is the **authoritative write-target set** for Phase 6 and is passed to `doc-planner` in Phase 5.7.
+
+---
+
+## Phase 5.7 — Plan Documentation (use case A only)
+
+Skip this phase for use case B.
+
+Invoke `doc-planner` sub-agent:
+
+- `agent_type: "general-purpose"`
+- Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/doc-planner/SKILL.md`
+- Pass input block:
+
+```yaml
+jira_reader_handoff: <paste full YAML from Phase 3>
+diff_summaries:       <paste array of diff-summarizer outputs from Phase 5>
+write_targets:        <paste confirmed list from Phase 5.6>
+screenshots:          <user-provided paths from Phase 1, possibly empty>
+repo_root:            <cwd's git root>
+```
+
+Handle the `status` and `gaps`:
+
+- **`status: OK`, `gaps: []`** → proceed to the approval prompt.
+- **`status: OK` or `PARTIAL` with `gaps` entries** — for each gap, act on its `recommended_action`:
+  - `"ask user"` → prompt inline **before** showing the checklist-approval choice. Feed answer back to planner via re-invocation (pass as `gap_resolution` field). If user declines, fall back to `"mark TODO in draft"`.
+  - `"mark TODO in draft"` → surface as visible TODO; Phase 6 writer emits `<!-- TODO: … -->`. Does not block approval.
+  - `"skip with note in final report"` → list in checklist display; carry forward into Phase 9 `### Skipped items`. Does not block approval.
+- **`status: PARTIAL`** alone (without user-asked gaps) is presented alongside the checklist for informed approval.
+
+Present the checklist (with any gaps + dispositions):
+```
+ask_user(
+  question: "Documentation checklist ready:\n<formatted checklist>\nHow would you like to proceed?",
+  choices: ["Approve & write (Recommended)", "Adjust (describe)", "Cancel"]
+)
+```
+
+---
+
 ## Phase 6 — Write Documentation / Epics
 
 ### Use case A — Feature documentation
@@ -579,36 +661,139 @@ Create `<cwd>/<JIRA_KEY>/` directory if not present.
 
 ---
 
-## Phase 7 — Doc Review Gate
+## Phase 6.7 — Style Check (before reviewer)
+
+### Use case A — docs-style-checker
+
+Invoke `docs-style-checker` on the files written in Phase 6:
+
+- `agent_type: "general-purpose"`
+- Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/docs-style-checker/SKILL.md`
+- Pass input block:
+
+```yaml
+repo_root: <cwd's git root>
+files:     <absolute paths of every file written or modified in Phase 6>
+```
+
+Act on the return:
+
+- **`status: NOT_CONFIGURED`** — no repo linter detected. Proceed to Phase 7 (no corporate style fallback in Copilot version). `doc-reviewer` will still check correctness/completeness.
+- **`status: OK`** — linter ran, zero violations. Proceed to Phase 7.
+- **`status: VIOLATIONS_FOUND`** — invoke `doc-fixer` sub-agent:
+
+  - `agent_type: "general-purpose"`
+  - Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/doc-fixer/SKILL.md`
+  - Pass input block:
+
+  ```
+  Task description: doc writing for <JIRA_KEY>
+  Reviewer or style-checker output: <paste full docs-style-checker output>
+  Project root: <cwd's git root>
+  Severities to fix: BLOCKER and MAJOR
+  ```
+
+  After `doc-fixer` completes, re-run `docs-style-checker` once. If violations remain:
+  ```
+  ask_user(
+    question: "Style check still has violations after one fix cycle. How would you like to proceed?",
+    choices: ["Proceed to review anyway — reviewer may still PASS", "Show remaining violations and let me fix manually", "Cancel"]
+  )
+  ```
+
+- **`status: ERROR`** — surface the error reason:
+  ```
+  ask_user(
+    question: "Style checker encountered an error: <reason>. How would you like to proceed?",
+    choices: ["Proceed to review without style check", "Cancel and fix locally"]
+  )
+  ```
+
+### Use case B — skip docs-style-checker
+
+For Epics (vault content), `docs-style-checker` is skipped (no repo linter for vault content). Proceed directly to Phase 7.
+
+---
+
+## Phase 7 — Review Gate
+
+### Use case A — doc-reviewer (feature docs)
 
 Invoke `doc-reviewer` sub-agent:
 
 - `agent_type: "general-purpose"`
 - Include full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/doc-reviewer/SKILL.md`
 - Pass the output file(s) written in Phase 6, the stated goal, the repo path (cwd), and the `model_routing` block
+- Additionally pass: the `doc-planner` checklist (Phase 5.7), `diff-summarizer` outputs (Phase 5), and the style-check report (Phase 6.7 output, or `status: NOT_CONFIGURED` if no linter ran)
 
-**On `status: OK`** → proceed to Phase 8.
+Act on the verdict:
 
-**On `status: CONCERNS`** → record findings in the Phase 9 report; proceed to Phase 8.
+- **`status: OK`** → proceed to Phase 8.
+- **`status: CONCERNS`** → record findings in Phase 9 report; proceed to Phase 8.
+- **`status: BLOCKERS`** or **PASS WITH RECOMMENDATIONS** containing MAJOR findings:
 
-**On `status: BLOCKERS`:**
-1. Apply each BLOCKER fix inline (orchestrator does this — no separate fixer sub-agent for docs)
-2. Re-invoke `doc-reviewer` once (one re-review)
-3. If still BLOCKERS after one fix cycle:
+  1. Invoke `doc-fixer` sub-agent:
+     - `agent_type: "general-purpose"`
+     - Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/doc-fixer/SKILL.md`
+     - Pass input block:
 
+     ```
+     Task description: doc writing for <JIRA_KEY>
+     Reviewer or style-checker output: <paste full doc-reviewer output>
+     Project root: <cwd's git root>
+     Severities to fix: BLOCKER and MAJOR
+     ```
+
+  2. Re-invoke `doc-reviewer` once (one re-review)
+  3. If still BLOCKERS after one fix cycle, escalate per-BLOCKER:
+
+  ```
+  ask_user(
+    question: "Doc review still has BLOCKER: <finding>. How would you like to proceed?",
+    choices: [
+      "Provide manual fix notes (you'll be prompted)",
+      "Defer to a follow-up issue (record in Phase 9 report)",
+      "Override and accept the finding",
+      "Cancel the whole run"
+    ]
+  )
+  ```
+  "Manual fix notes" → take free-text; apply via `doc-fixer` one-shot (no further re-review). "Defer" → record in Phase 9 `### Deferred items`. "Override" → record with rationale.
+
+### Use case B — epic-reviewer (Epics)
+
+Invoke `epic-reviewer` sub-agent (Opus-pinned):
+
+- `agent_type: "general-purpose"`, `model: claude-opus-4.7`
+- Include the full content of `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/epic-reviewer/SKILL.md`
+- Pass input block:
+
+```yaml
+task_description: <one-paragraph: VI key, VI goal, number of Epics drafted>
+written_epic_files: <absolute paths of every Epic file written in Phase 6>
+jira_reader_handoff: <paste full YAML from Phase 3>
+code_scanner_output:  <paste array of per-repo scanner outputs from Phase 5, or 'N/A — code scan off'>
 ```
-ask_user(
-  question: "Doc review still has BLOCKER: <finding>. How would you like to proceed?",
-  choices: [
-    "Apply fix as suggested (describe fix)",
-    "Defer this finding",
-    "Override — mark as acceptable",
-    "Other… (describe)"
-  ]
-)
-```
 
-**Cap:** 1 fix cycle + 1 re-review maximum.
+Act on the verdict (same escalation pattern as use case A):
+
+- **BLOCK** — invoke `doc-fixer` with `Severities to fix: BLOCKER and MAJOR`. Re-invoke `epic-reviewer` once. If still BLOCK, escalate per-BLOCKER:
+  ```
+  ask_user(
+    question: "Epic review still has BLOCKER: <finding>. How would you like to proceed?",
+    choices: [
+      "Provide manual fix notes (you'll be prompted)",
+      "Defer to a follow-up issue (record in Phase 9 report)",
+      "Override and accept the finding",
+      "Cancel the whole run"
+    ]
+  )
+  ```
+  For Epics, "Defer" means the finding goes into an Epic-refinement note in the draft itself (appended as a `## Refinement notes` section) in addition to Phase 9 report.
+- **PASS WITH RECOMMENDATIONS** — invoke `doc-fixer` for MAJOR findings only. MINOR/NIT findings are deferred to Phase 9 report.
+- **PASS** → proceed to Phase 8.
+
+**Cap for both use cases:** 1 fix cycle + 1 re-review maximum.
 
 ---
 
@@ -695,5 +880,10 @@ If branch was created:
 | `git fetch` failed | "Continue with current local state", "Skip this repo", "Cancel" |
 | `diff-summarizer` returned `unresolved_prs` | "Show candidates and let me pick", "Skip this PR", "Skip this repo", "Cancel" |
 | Use case B, no repos derivable | "List repos manually", "Proceed without code scan", "Cancel" |
-| `doc-reviewer` BLOCKERS after one fix cycle | Per-BLOCKER question with "Apply fix", "Defer", "Override" |
+| `doc-location-finder` LOW_CONFIDENCE | "Adjust individual locations (Recommended)", "Accept all proposed locations", "Cancel" |
+| `doc-location-finder` EMPTY | "Specify locations manually (you'll be prompted)", "Cancel" |
+| `doc-planner` with gaps | Per-gap prompt based on `recommended_action`; checklist approval with "Approve & write", "Adjust", "Cancel" |
+| `docs-style-checker` VIOLATIONS after fix | "Proceed to review anyway", "Show remaining violations and let me fix manually", "Cancel" |
+| `docs-style-checker` ERROR | "Proceed to review without style check", "Cancel and fix locally" |
+| `doc-reviewer` or `epic-reviewer` BLOCKERS after one fix cycle | Per-BLOCKER: "Provide manual fix notes", "Defer", "Override", "Cancel the whole run" |
 | Output file already exists | "Overwrite", "Write to <path-v2>.md", "Cancel" |

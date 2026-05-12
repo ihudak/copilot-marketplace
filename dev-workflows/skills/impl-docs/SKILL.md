@@ -171,8 +171,21 @@ Evaluate the Doc Review Report:
 - `status: OK` → proceed to Phase 4.
 - `status: CONCERNS` → record findings in the Phase 5 report; fix any CONCERN that is trivially
   addressable inline; proceed to Phase 4 without re-review.
-- `status: BLOCKERS` → apply all BLOCKER findings now (edit files to fix broken links, missing
-  content, invalid front matter, etc.). Then invoke `doc-reviewer` **once more**:
+- `status: BLOCKERS` → invoke `doc-fixer` sub-agent to resolve BLOCKER findings:
+
+  ```
+  task(
+    agent_type: "doc-fixer",
+    mode:       "sync",
+    description:"Fix BLOCKER findings",
+    prompt:     "Task description: docs update for <repo> — <goal>
+                 Reviewer or style-checker output: <paste full doc-reviewer output>
+                 Project root: <absolute-repo-root>
+                 Severities to fix: BLOCKER and MAJOR"
+  )
+  ```
+
+  Then invoke `doc-reviewer` **once more**:
   - Second review `OK` or `CONCERNS` → proceed to Phase 4.
   - Second review still `BLOCKERS` → surface the unresolved BLOCKERs to the user via `ask_user`
     and stop until resolved. Do not loop further.

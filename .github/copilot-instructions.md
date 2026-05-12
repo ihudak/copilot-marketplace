@@ -100,15 +100,22 @@ All orchestrators must load and follow `model-routing.md` at the start of every 
 ## `dev-workflows` plugin — skill relationships
 
 ```
-impl:code: / impl:  → [rubber-duck@Opus plan critique] → impl → [code-review@Opus] → review-fixer → test-writer → tests → impl-maintenance
-impl:docs:          → impl-docs → [doc-reviewer] → impl-maintenance
-impl:jira:docs:     → impl-jira → jira-reader → [diff-summarizer×N (parallel)] → [doc-reviewer] → impl-maintenance
-impl:jira:epics:    → impl-jira → jira-reader → [code-scanner×N (parallel, optional)] → [doc-reviewer] → impl-maintenance
+impl:code: / impl:  → [risk-planner@Opus plan critique] → impl → [code-review@Opus] → review-fixer → test-writer → tests → impl-maintenance
+impl:docs:          → impl-docs → [doc-reviewer] → [doc-fixer] → impl-maintenance
+impl:jira:docs:     → impl-jira → jira-reader → [diff-summarizer×N (parallel)] → [doc-location-finder] → [doc-planner] → writing → [docs-style-checker] → [doc-fixer] → [doc-reviewer] → [doc-fixer] → impl-maintenance
+impl:jira:epics:    → impl-jira → jira-reader → [code-scanner×N (parallel, optional)] → writing → [docs-style-checker] → [doc-fixer] → [epic-reviewer@Opus] → [doc-fixer] → impl-maintenance
 fix-vuln:           → vuln-research → vuln-fixer → [code-review@Opus] → review-fixer → tests → impl-maintenance
 upgrade:            → upgrade-planner → upgrade-executor → [code-review@Opus] → review-fixer → tests → impl-maintenance
-                    └── test-baseliner (used by upgrade-executor, vuln-fixer, and impl:code:)
-                    └── test-writer    (used by impl:code: only — Phase 3.7)
-                    └── doc-reviewer   (used by impl:docs: Phase 3.5, and impl:jira: Phase 7)
+                    └── test-baseliner    (used by upgrade-executor, vuln-fixer, and impl:code:)
+                    └── test-writer       (used by impl:code: only — Phase 3.7)
+                    └── risk-planner      (used by impl:code: — Phase 2.5, replaces rubber-duck)
+                    └── code-review       (used by impl:code: — Phase 3.9, fix-vuln, upgrade)
+                    └── doc-reviewer      (used by impl:docs: Phase 3.5, and impl:jira:docs: Phase 7)
+                    └── doc-fixer         (used by impl:docs: Phase 3.5, impl:jira: Phases 6.7/7)
+                    └── doc-location-finder (used by impl:jira:docs: Phase 5.6)
+                    └── doc-planner       (used by impl:jira:docs: Phase 5.7)
+                    └── docs-style-checker (used by impl:jira: Phase 6.7)
+                    └── epic-reviewer     (used by impl:jira:epics: Phase 7)
 ```
 
 Key invariants enforced by all three code orchestrators:
@@ -127,7 +134,7 @@ Key invariants for `impl:docs:`:
 - **No branch creation by default** — works on current branch unless user requests one
 - **No test-baseliner, no test-writer, no code-review** — docs-only phases only
 - `doc-reviewer` sub-agent (Phase 3.5) performs comprehensive review: links, headings, wikilinks, style, completeness
-- BLOCKER findings trigger a fix cycle (max one fix + one re-review); CONCERNs are recorded and may be fixed inline
+- BLOCKER findings trigger a fix cycle via `doc-fixer` sub-agent (max one fix + one re-review); CONCERNs are recorded and may be fixed inline
 - Mixed code + docs changes must use `impl:code:` instead
 
 Key invariants for `impl:jira:`:
@@ -137,7 +144,10 @@ Key invariants for `impl:jira:`:
 - Parallel sub-agent invocation: all diff-summarizers (use case A) or code-scanners (use case B) are launched in a **single response** (one `task()` per repo)
 - Branch setup (Phase 5.5) happens **before** writing output files (Phase 6) — never after
 - Branch policy: walk up cwd for `.obsidian/` → `obsidian` (never branch); else `git rev-parse` → `git_repo` (branch opt-in) or `plain_dir` (never branch). User can override at plan approval
-- `doc-reviewer` gate (Phase 7): cap 1 fix cycle + 1 re-review; orchestrator fixes BLOCKERs inline
+- Phase 5.6 `doc-location-finder` (use case A only) identifies write targets before writing begins
+- Phase 5.7 `doc-planner` (use case A only) synthesises Jira + diffs into a documentation checklist
+- Phase 6.7 `docs-style-checker` + `doc-fixer` lint prose after writing, before review gate
+- Phase 7 review gate: `doc-reviewer` (use case A) or `epic-reviewer@Opus` (use case B); `doc-fixer` resolves BLOCKERs; cap 1 fix cycle + 1 re-review
 - Sub-agents return `DIRTY_TREE` / `REFRESH_BLOCKED` when they cannot refresh repos — orchestrator escalates to user; never silent failure
 - Every written claim must cite originating Jira key (`[[KEY]]`) + PR URL (use case A) or file path (use case B)
 - Writes never touch `_archive/` (vault read-only zone); never write outside cwd unless user provides explicit absolute path
@@ -178,7 +188,7 @@ On any other machine, `copilot plugin install dev-workflows@ihudak-copilot-plugi
   "metadata": { "description": "...", "version": "1.0.0", "pluginRoot": "." },
   "owner": { "name": "...", "email": "..." },
   "plugins": [
-    { "name": "dev-workflows", "source": "dev-workflows", "description": "...", "version": "1.0.0" }
+    { "name": "dev-workflows", "source": "dev-workflows", "description": "...", "version": "1.2.0" }
   ]
 }
 ```

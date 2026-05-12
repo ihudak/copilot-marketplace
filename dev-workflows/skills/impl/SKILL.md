@@ -61,7 +61,7 @@ include it verbatim in the Phase 5 final report under `### Model Routing`.
 - **SIMPLE / MODERATE** — proceed to Phase 1 normally. No mandatory Opus steps.
 - **SIGNIFICANT / HIGH-RISK** —
   - **Phase 2 plan** is produced normally, then **critiqued by an Opus
-    sub-agent** (`task` with `agent_type: "rubber-duck"`, `model:
+    sub-agent** (`task` with `agent_type: "risk-planner"`, `model:
     claude-opus-4.7` or the highest available per `_shared/model-routing.md`
     §2). Address every BLOCKER and document every CONCERN before requesting
     user approval.
