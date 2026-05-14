@@ -217,6 +217,9 @@ Wiki operations MUST NEVER write to: `Meetings/`, `Daily/`, `Projects/`, `Custom
 `People/`, `Clippings/`, `Research/`. Read these directories; never modify them.
 Write only to `wiki/`.
 
+**Exception**: `/wiki-task` and `/wiki-tasks-extract` intentionally write to `Projects/`
+files and `Tasks.md`. These are the only wiki commands allowed outside `wiki/` and `.raw/`.
+
 Only use tags from `.obsidian/copilot/tag-index.md`. Never invent new tags.
 <!-- WIKI_BLOCK_END -->
 
