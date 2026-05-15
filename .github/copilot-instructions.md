@@ -197,7 +197,7 @@ On any other machine, `copilot plugin install dev-workflows@ihudak-copilot-plugi
   "metadata": { "description": "...", "version": "1.0.0", "pluginRoot": "." },
   "owner": { "name": "...", "email": "..." },
   "plugins": [
-    { "name": "dev-workflows", "source": "dev-workflows", "description": "...", "version": "1.2.0" }
+    { "name": "dev-workflows", "source": "dev-workflows", "description": "...", "version": "1.3.0" }
   ]
 }
 ```

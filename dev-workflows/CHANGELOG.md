@@ -4,6 +4,16 @@ All notable changes to the **dev-workflows** plugin are recorded here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow semver at the plugin level.
 
+## [1.3.0] — 2026-05-15
+
+### Changed
+- **Cross-platform sync with Claude Code plugin (v1.3.0).**
+  - Ported `check_guidelines.py` and `checklist-template.md` to
+    `guideline-reviewer/references/` (added in Claude Code v1.2.0, missing
+    from the Copilot port).
+  - Version numbers now track 1:1 between Copilot CLI and Claude Code
+    plugin repos. Previous version drift: Copilot 1.2.1 / Claude 1.2.0.
+
 ## [1.2.1] — 2026-05-15
 
 ### Breaking changes
