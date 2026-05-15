@@ -123,10 +123,10 @@ Use today's date (YYYY-MM-DD) in the `updated:` fields of files you create.
 
 ## Step 4 — Sync wiki-schema to vault
 
-Read the schema file from the plugin installation via bash (to ensure tilde-expansion):
+Read the schema file from the plugin installation via bash:
 
 ```bash
-cat "${HOME}/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/wiki-schema/SKILL.md"
+cat ~/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/wiki-schema/SKILL.md
 ```
 
 Create the target directory if needed:
@@ -148,7 +148,7 @@ Check whether `${VAULT}/.obsidian/copilot/tag-index.md` exists.
 - **If it does not exist**: read the template from the plugin:
 
 ```bash
-cat "${HOME}/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/_shared/tag-index-template.md"
+cat ~/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/_shared/tag-index-template.md
 ```
 
 Write the template content to `${VAULT}/.obsidian/copilot/tag-index.md`.
@@ -163,7 +163,7 @@ commented-out examples — no real tags.
 Read the canonical task rules from the plugin:
 
 ```bash
-cat "${HOME}/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/_shared/task-rules.md"
+cat ~/.copilot/installed-plugins/ihudak-copilot-plugins/obsidian-llm-wiki/skills/_shared/task-rules.md
 ```
 
 Write the content to `${VAULT}/.obsidian/copilot/task-creation-rules.md`. **Always

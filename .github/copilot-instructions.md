@@ -95,7 +95,7 @@ When adding a new skill that references shared content, always reference via the
 - The `model_routing` YAML block format passed between orchestrators and sub-agents
 - The `phase: verify-resume` protocol for gating tests on Opus review
 
-All orchestrators must load and follow `model-routing.md` at the start of every invocation. Sub-agents receive the `model_routing` block in their prompt; they do not re-read the file.
+All orchestrators that dispatch sub-agents (`impl`, `impl-docs`, `impl-jira`, `fix-vuln`, `upgrade`) must load and follow `model-routing.md` at the start of every invocation. Standalone review orchestrators (`api-guideline-reviewer`, `guideline-reviewer`) are exempt — they do not classify complexity or route models. Sub-agents receive the `model_routing` block in their prompt; they do not re-read the file.
 
 ## `dev-workflows` plugin — skill relationships
 
