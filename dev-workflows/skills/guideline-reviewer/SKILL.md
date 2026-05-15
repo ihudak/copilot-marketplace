@@ -1,6 +1,7 @@
 ---
 name: guideline-reviewer
 description: "Review code and UI for compliance with Dynatrace Experience Standards (GUIDElines). Use when: (1) reviewing app code for GUIDEline compliance, (2) checking if UI components follow Dynatrace standards, (3) validating component usage (AppHeader, DataTable, FilterField, etc.), (4) ensuring accessibility/WCAG compliance, (5) reviewing terminology usage, (6) checking settings implementations. Triggers on: 'review for guidelines', 'check compliance', 'does this follow standards', 'GUIDEline review', 'Dynatrace standards'."
+allowed-tools: view, edit, create, bash, glob, grep, ask_user, sql
 ---
 
 # GUIDEline Reviewer
