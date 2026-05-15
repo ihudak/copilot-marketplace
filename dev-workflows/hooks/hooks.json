@@ -19,6 +19,9 @@
         "type": "command",
         "bash": "bash ${PLUGIN_ROOT}/hooks/test-notify.sh"
       }
-    ]
+    ],
+    "_notes": {
+      "PostToolUse_matcher": "Claude Code supports a 'matcher' field (e.g. matcher: 'Bash') to restrict PostToolUse hooks to specific tools. Copilot CLI does not support matchers — test-notify.sh fires on every tool use. The script must be fast and exit 0 quickly for non-Bash invocations."
+    }
   }
 }
