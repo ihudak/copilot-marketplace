@@ -9,6 +9,6 @@
   "homepage": "https://github.com/ihudak/ihudak-copilot-plugins/tree/main/dev-workflows",
   "repository": "https://github.com/ihudak/ihudak-copilot-plugins",
   "license": "MIT",
-  "keywords": ["impl", "vuln", "upgrade", "development", "workflow", "security", "dependencies"],
+  "keywords": ["impl", "vuln", "upgrade", "development", "workflow", "security", "dependencies", "guidelines", "api-review"],
   "skills": "./skills/"
 }
