@@ -6,6 +6,7 @@ description: >
   and the format of _index.md, _log.md, _manifest.json, and hot.md. Read this before
   any wiki operation (ingest, scan, query, save, lint, hot, tags-refresh).
   Triggers on: wiki schema, wiki conventions, wiki structure, wiki rules.
+allowed-tools: view
 ---
 
 # Wiki Schema — obsidian-llm-wiki
