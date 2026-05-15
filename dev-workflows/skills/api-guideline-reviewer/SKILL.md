@@ -1,6 +1,7 @@
 ---
-name: api-guideline-review
+name: api-guideline-reviewer
 description: Review OpenAPI specification files against Dynatrace REST API and IAM permission naming guidelines. Use when reviewing API specs for compliance, validating OpenAPI documents against Dynatrace standards, checking IAM scope naming, or auditing API designs. Triggers on requests to review OpenAPI/Swagger specs, check API compliance, validate Dynatrace API guidelines, or review IAM permissions.
+allowed-tools: view, edit, create, bash, glob, grep, ask_user, sql
 ---
 
 # API Guideline Review

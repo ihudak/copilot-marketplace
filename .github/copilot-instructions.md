@@ -117,6 +117,8 @@ upgrade:            → upgrade-planner → upgrade-executor → [code-review@Op
                     └── docs-style-checker (used by impl:jira: Phase 6.7)
                     └── dt-style-checker  (from dt-style-guide plugin; fallback for docs-style-checker, primary for epics)
                     └── epic-reviewer     (used by impl:jira:epics: Phase 7)
+api-guideline-reviewer:  → standalone orchestrator; reviews OpenAPI specs against Dynatrace REST API + IAM guidelines
+guideline-reviewer:     → standalone orchestrator; reviews code/UI against Dynatrace Experience Standards (GUIDElines)
 ```
 
 Key invariants enforced by all three code orchestrators:

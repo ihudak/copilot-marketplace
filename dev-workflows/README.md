@@ -19,6 +19,8 @@ copilot plugin install dev-workflows@ihudak-copilot-plugins
 | `impl:jira:docs:` / `impl:jira:epics:` / `impl:jira:` | impl-jira | Jira-driven documentation workflow. Reads Jira work-item exports from an Obsidian vault, resolves Bitbucket PR URLs as local-git identifiers (no HTTPS/API calls), runs parallel diff-summarizers (use case A — feature docs) or code-scanners (use case B — Epic writing), synthesises output with mandatory inline citations, gates on doc-reviewer, and runs impl-maintenance. |
 | `fix-vuln:` | fix-vuln | Remediate one or more CVEs. Researches each CVE via NVD, applies the minimal safe version bump, verifies tests, applies Opus code-review, runs post-batch maintenance. Each CVE gets its own branch and PR. |
 | `upgrade:` | upgrade | Upgrade one or more dependencies to a target version. Creates an upgrade branch, captures test baseline, plans compatibility per-component, upgrades and verifies in sequence, applies Opus code-review, runs post-batch maintenance. |
+| `api-guideline-reviewer:` | api-guideline-reviewer | Review OpenAPI specification files against Dynatrace REST API and IAM permission naming guidelines. Validates compliance with Dynatrace API standards and IAM scope naming. |
+| `guideline-reviewer:` | guideline-reviewer | Review code and UI for compliance with Dynatrace Experience Standards (GUIDElines). Checks component usage, accessibility/WCAG compliance, terminology, and settings implementations. |
 
 ### Sub-agent skills (invoked by orchestrators)
 
