@@ -4,6 +4,22 @@ All notable changes to the **dev-workflows** plugin are recorded here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versions follow semver at the plugin level.
 
+## [1.2.1] — 2026-05-15
+
+### Breaking changes
+- **`impl:` is now a dispatcher.** Bare `impl:` no longer runs the code-implementation
+  workflow — it prints a help page with the command matrix. Use `impl:code:` explicitly.
+  Aligns with Claude Code plugin behaviour since v1.1.0.
+
+### Added
+- **`impl-dispatcher` skill.** Help / dispatcher triggered by bare `impl:`. Lists all
+  `impl:*` variants and related skills (`fix-vuln:`, `upgrade:`), then stops.
+
+### Changed
+- **`impl` skill trigger narrowed.** Now only activates on `impl:code:` and `implement:`.
+- **Marketplace descriptions enriched.** `dev-workflows` and `dt-style-guide` descriptions
+  in `.github/plugin/marketplace.json` now enumerate all skills, sub-agents, and hooks.
+
 ## [1.2.0] — 2026-05-12
 
 Copilot CLI port of the Claude Code dev-workflows plugin (v1.1.0).

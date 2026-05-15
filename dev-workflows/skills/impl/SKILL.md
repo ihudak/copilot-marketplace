@@ -2,8 +2,9 @@
 name: impl
 description: >
   Structured code-implementation workflow. Activated when the user's prompt starts with
-  "impl:", "impl:code:", "implement:", or "impl: @<file>". Does NOT activate for
-  "impl:docs:" prompts — those are handled by the impl-docs skill.
+  "impl:code:", "implement:", or "impl:code: @<file>". Does NOT activate for bare "impl:"
+  prompts (those go to the impl-dispatcher help page), nor for "impl:docs:" prompts
+  (handled by the impl-docs skill).
   Enforces ask-don't-guess discipline: clarify all ambiguities first, produce an approved plan,
   then implement immediately. Captures a test baseline before changes, writes tests for all
   new/changed behaviour, and verifies no regressions after.
@@ -11,11 +12,11 @@ description: >
 allowed-tools: view, edit, create, bash, glob, grep, ask_user, sql
 ---
 
-# `impl:` / `impl:code:` — Structured Code-Implementation Skill
+# `impl:code:` — Structured Code-Implementation Skill
 
-Activated when the user prompt starts with `impl:`, `impl:code:`, or `implement:`
+Activated when the user prompt starts with `impl:code:` or `implement:`
 (optionally followed by `@<file.md>` to load description from a file).
-`impl:` is a silent alias for `impl:code:` — behaviour is identical.
+Bare `impl:` now routes to the dispatcher — use `impl:code:` explicitly.
 
 > **Model routing is mandatory.** Before any planning happens, this skill MUST
 > classify the task per `~/.copilot/installed-plugins/ihudak-copilot-plugins/dev-workflows/skills/_shared/model-routing.md` and follow

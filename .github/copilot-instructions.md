@@ -100,7 +100,8 @@ All orchestrators that dispatch sub-agents (`impl`, `impl-docs`, `impl-jira`, `f
 ## `dev-workflows` plugin — skill relationships
 
 ```
-impl:code: / impl:  → [risk-planner@Opus plan critique] → impl → [code-review@Opus] → review-fixer → test-writer → tests → impl-maintenance
+impl:code:              → impl → [risk-planner@Opus plan critique] → [code-review@Opus] → review-fixer → test-writer → tests → impl-maintenance
+impl:                   → impl-dispatcher (help page; does not run a workflow)
 impl:docs:          → impl-docs → [doc-reviewer] → [doc-fixer] → impl-maintenance
 impl:jira:docs:     → impl-jira → jira-reader → [diff-summarizer×N (parallel)] → [doc-location-finder] → [doc-planner] → writing → [docs-style-checker → dt-style-checker fallback] → [doc-fixer] → [doc-reviewer] → [doc-fixer] → impl-maintenance
 impl:jira:epics:    → impl-jira → jira-reader → [code-scanner×N (parallel, optional)] → writing → [dt-style-checker] → [doc-fixer] → [epic-reviewer@Opus] → [doc-fixer] → impl-maintenance
